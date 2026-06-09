@@ -164,11 +164,6 @@ export default function Module00Overview() {
       </div>
 
       <div className="section-container">
-        {/* Title */}
-        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8">
-          <span className="text-orange-500">dbt platform</span>: the data & AI control plane
-        </h3>
-
         {/* Diagram container */}
         <div className="relative rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(160deg, #fff7ed 0%, #fef3e2 15%, #faf5ff 40%, #eef2ff 65%, #f0fdf4 100%)' }}>
           <div className="p-3 md:p-4">
