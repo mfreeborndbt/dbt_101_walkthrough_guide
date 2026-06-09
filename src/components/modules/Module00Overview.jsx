@@ -270,7 +270,7 @@ export default function Module00Overview() {
                         <motion.div
                           whileHover={{ scale: 1.06, boxShadow: '0 6px 20px rgba(99,102,241,0.2)' }}
                           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                          className="flex items-center gap-2 px-5 py-3 bg-white border border-indigo-100 rounded-xl text-sm font-semibold text-gray-800 shadow-sm cursor-default shrink-0"
+                          className="flex items-center justify-center gap-2 px-5 py-3 bg-white border border-indigo-100 rounded-xl text-sm font-semibold text-gray-800 shadow-sm cursor-default shrink-0 min-w-[180px]"
                         >
                           <CloudDownload size={16} strokeWidth={1.5} className="text-indigo-400" />
                           Ingestion
@@ -328,7 +328,7 @@ export default function Module00Overview() {
                         <motion.div
                           whileHover={{ scale: 1.06, boxShadow: '0 6px 20px rgba(34,197,94,0.2)' }}
                           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                          className="flex items-center gap-2 px-5 py-3 bg-white border border-green-100 rounded-xl text-sm font-semibold text-gray-800 shadow-sm cursor-default shrink-0"
+                          className="flex items-center justify-center gap-2 px-5 py-3 bg-white border border-green-100 rounded-xl text-sm font-semibold text-gray-800 shadow-sm cursor-default shrink-0 min-w-[180px]"
                         >
                           BI / Analytics / AI
                           <BarChart3 size={16} strokeWidth={1.5} className="text-green-400" />
