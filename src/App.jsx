@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Workshop modules (Part 1)
+import Module00Overview from './components/modules/Module00Overview'
 import Module01 from './components/modules/Module01'
 import Module02 from './components/modules/Module02'
 import Module03Models from './components/modules/Module03Models'
@@ -27,6 +28,7 @@ const topTabs = [
 ]
 
 const workshopModules = [
+  { key: 'm00', label: '00 Overview', component: Module00Overview },
   { key: 'm01', label: '01 Architecture & setup', component: Module01 },
   { key: 'm02', label: '02 Sources', component: Module02 },
   { key: 'm03', label: '03 Models 101', component: Module03Models },
@@ -67,7 +69,7 @@ function Part2Page({ activePillar }) {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('part1')
-  const [activeModule, setActiveModule] = useState('m01')
+  const [activeModule, setActiveModule] = useState('m00')
   const [activePillar, setActivePillar] = useState('standards')
 
   const ModuleComponent = workshopModules.find(m => m.key === activeModule)?.component
@@ -84,7 +86,7 @@ export default function App() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(249,115,22,0.08)_0%,_transparent_60%)]" />
         <div className="section-container py-8 md:py-10 text-center">
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <button onClick={() => { setActiveTab('part1'); setActiveModule('m01') }} className="inline-flex items-center gap-2 mb-4">
+            <button onClick={() => { setActiveTab('part1'); setActiveModule('m00') }} className="inline-flex items-center gap-2 mb-4">
               <img src={dbtIconTransparent} alt="dbt" className="h-10" />
               <span className="text-white font-bold text-xl">dbt <span className="font-normal">fundamentals</span></span>
             </button>
