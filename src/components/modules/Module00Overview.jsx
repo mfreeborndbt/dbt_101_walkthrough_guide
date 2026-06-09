@@ -153,11 +153,6 @@ export default function Module00Overview() {
     setCardStates(prev => ({ ...prev, [id]: nextState }))
   }
 
-  const handleReset = () => {
-    setPlatforms(CANONICAL_PLATFORMS)
-    setCardStates({})
-  }
-
   return (
     <div className="py-8">
       {/* Module header */}
@@ -176,8 +171,8 @@ export default function Module00Overview() {
 
         {/* Diagram container */}
         <div className="relative rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(160deg, #fff7ed 0%, #fef3e2 15%, #faf5ff 40%, #eef2ff 65%, #f0fdf4 100%)' }}>
-          <div className="p-5 md:p-6">
-            <motion.div layout className="relative min-h-[200px]" transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}>
+          <div className="p-3 md:p-4">
+            <motion.div layout className="relative" transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}>
 
               {/* Orange spine */}
               <motion.div
@@ -201,27 +196,27 @@ export default function Module00Overview() {
                       layout
                       key="metadata"
                       initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+                      animate={{ opacity: 1, height: 'auto', marginBottom: 8 }}
                       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                       style={{ overflow: 'hidden' }}
                     >
                       <div className="rounded-2xl overflow-hidden shadow-lg" style={{ background: 'linear-gradient(135deg, #fb923c 0%, #F97316 40%, #ea580c 100%)' }}>
-                        <div className="px-6 md:px-8 pt-4 pb-2">
-                          <div className="flex items-center gap-2 mb-3">
+                        <div className="px-6 md:px-8 pt-3 pb-1">
+                          <div className="flex items-center gap-2 mb-2">
                             <Layers size={16} strokeWidth={1.5} className="text-white/70" />
                             <span className="font-bold text-white/60 text-[10px] uppercase tracking-wider">Unified Metadata</span>
                             <span className="ml-1"><img src={dbtIcon} alt="dbt" className="h-4 opacity-80" /></span>
                           </div>
                         </div>
-                        <div className="mx-3 mb-3 rounded-xl bg-[#fef7ed]/95 backdrop-blur-sm p-4">
-                          <div className="flex flex-wrap gap-2.5 justify-between px-6 md:px-8">
+                        <div className="mx-3 mb-2 rounded-xl bg-[#fef7ed]/95 backdrop-blur-sm p-3">
+                          <div className="flex flex-wrap gap-2 justify-between px-4 md:px-6">
                             {metadataItems.map(item => (
                               <motion.span
                                 key={item}
                                 whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(249,115,22,0.15)' }}
                                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                                className="px-4 py-2.5 bg-white border border-orange-200 rounded-lg text-sm font-semibold text-gray-800 flex-1 min-w-[110px] text-center cursor-default shadow-sm"
+                                className="px-3 py-2 bg-white border border-orange-200 rounded-lg text-sm font-semibold text-gray-800 flex-1 min-w-[110px] text-center cursor-default shadow-sm"
                               >
                                 {item}
                               </motion.span>
@@ -240,23 +235,23 @@ export default function Module00Overview() {
                       layout
                       key="personas"
                       initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+                      animate={{ opacity: 1, height: 'auto', marginBottom: 8 }}
                       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                       style={{ overflow: 'hidden' }}
                     >
-                      <div className="rounded-2xl p-5 shadow-lg" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #7c3aed)' }}>
-                        <div className="px-6 md:px-8">
-                          <p className="text-white/60 font-bold text-[10px] mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                      <div className="rounded-2xl p-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #7c3aed)' }}>
+                        <div className="px-4 md:px-6">
+                          <p className="text-white/60 font-bold text-[10px] mb-2 uppercase tracking-wider flex items-center gap-1.5">
                             <Users size={14} strokeWidth={1.5} className="text-white/50" /> Personas
                           </p>
-                          <div className="flex flex-wrap gap-3 justify-between">
+                          <div className="flex flex-wrap gap-2.5 justify-between">
                             {personaItems.map(item => (
                               <motion.span
                                 key={item}
                                 whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
                                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                                className="px-5 py-3 bg-white/20 border border-white/30 text-white rounded-lg text-sm font-semibold flex-1 min-w-[180px] text-center backdrop-blur-sm cursor-default"
+                                className="px-4 py-2 bg-white/20 border border-white/30 text-white rounded-lg text-sm font-semibold flex-1 min-w-[180px] text-center backdrop-blur-sm cursor-default"
                               >
                                 {item}
                               </motion.span>
@@ -269,10 +264,10 @@ export default function Module00Overview() {
                 </AnimatePresence>
 
                 {/* Pipeline lane (always visible) */}
-                <motion.div layout style={{ marginBottom: 12 }} transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}>
-                  <div className="rounded-2xl border border-orange-100 p-5 shadow-sm" style={{ background: 'linear-gradient(135deg, #fffbf5, #fff8f0, #fefcfb)' }}>
-                    <div className="px-6 md:px-8">
-                      <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                <motion.div layout style={{ marginBottom: 8 }} transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}>
+                  <div className="rounded-2xl border border-orange-100 p-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #fffbf5, #fff8f0, #fefcfb)' }}>
+                    <div className="px-4 md:px-6">
+                      <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Workflow size={14} strokeWidth={1.5} className="text-orange-300" /> Pipeline
                       </p>
                       <div className="flex items-center gap-0">
@@ -340,9 +335,9 @@ export default function Module00Overview() {
 
                 {/* Data Platform lane (always visible) */}
                 <motion.div layout transition={{ duration: 0.3 }}>
-                  <div className="rounded-2xl p-5 shadow-lg" style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b, #1e293b)' }}>
-                    <div className="px-6 md:px-8">
-                      <p className="text-white/50 font-bold text-[10px] mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="rounded-2xl p-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b, #1e293b)' }}>
+                    <div className="px-4 md:px-6">
+                      <p className="text-white/50 font-bold text-[10px] mb-2 uppercase tracking-wider flex items-center gap-1.5">
                         <Server size={14} strokeWidth={1.5} className="text-indigo-400/60" /> Data platform
                       </p>
 
@@ -361,16 +356,6 @@ export default function Module00Overview() {
                           />
                         ))}
                       </Reorder.Group>
-
-                      {/* Reset button */}
-                      <div className="flex justify-center mt-3">
-                        <button
-                          onClick={handleReset}
-                          className="text-[10px] text-white/30 hover:text-white/60 transition-colors duration-200 font-medium tracking-wide"
-                        >
-                          Reset order
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -380,7 +365,7 @@ export default function Module00Overview() {
         </div>
 
         {/* Stage toggle + progress dots */}
-        <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="mt-4 flex flex-col items-center gap-2">
           <div className="flex gap-1.5">
             {stages.map((_, i) => (
               <div
@@ -408,18 +393,6 @@ export default function Module00Overview() {
             ))}
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={stage}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="text-sm text-gray-500 text-center max-w-xl"
-            >
-              {stages[stage].caption}
-            </motion.p>
-          </AnimatePresence>
         </div>
       </div>
     </div>
