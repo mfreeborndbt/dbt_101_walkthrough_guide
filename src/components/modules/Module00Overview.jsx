@@ -310,7 +310,8 @@ export default function Module00Overview() {
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
                               transition={{ duration: 0.4 }}
-                              className="px-10 py-5 border-2 border-dashed border-orange-200 rounded-xl text-center min-w-[170px] shrink-0 bg-white/50"
+                              whileHover={{ scale: 1.06, borderColor: 'rgba(249,115,22,0.6)', boxShadow: '0 6px 20px rgba(249,115,22,0.2)' }}
+                              className="px-10 py-5 border-2 border-dashed border-orange-200 rounded-xl text-center min-w-[170px] shrink-0 bg-white/50 cursor-pointer"
                             >
                               <p className="text-xl font-bold text-orange-200">?</p>
                             </motion.div>
