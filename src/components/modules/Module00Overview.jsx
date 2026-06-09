@@ -134,7 +134,6 @@ function PlatformCard({ platform, cardState, onClickToggle, isDragging }) {
 export default function Module00Overview() {
   const [stage, setStage] = useState(0)
   const [platforms, setPlatforms] = useState(CANONICAL_PLATFORMS)
-  const [activeCard, setActiveCard] = useState(null) // platform id
   const [cardStates, setCardStates] = useState({}) // id -> 0|1|2
 
   const goTo = useCallback((s) => setStage(Math.max(0, Math.min(3, s))), [])
@@ -151,24 +150,11 @@ export default function Module00Overview() {
   const handleCardClick = (id) => {
     const currentState = cardStates[id] || 0
     const nextState = (currentState + 1) % 3
-
-    if (nextState === 0) {
-      // Going back to default
-      setActiveCard(null)
-      setCardStates(prev => ({ ...prev, [id]: 0 }))
-    } else {
-      // Single-select: reset all others
-      const reset = {}
-      Object.keys(cardStates).forEach(k => { reset[k] = 0 })
-      reset[id] = nextState
-      setActiveCard(id)
-      setCardStates(reset)
-    }
+    setCardStates(prev => ({ ...prev, [id]: nextState }))
   }
 
   const handleReset = () => {
     setPlatforms(CANONICAL_PLATFORMS)
-    setActiveCard(null)
     setCardStates({})
   }
 
