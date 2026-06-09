@@ -86,10 +86,12 @@ export default function App() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(249,115,22,0.08)_0%,_transparent_60%)]" />
         <div className="section-container py-8 md:py-10 text-center">
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <button onClick={() => { setActiveTab('part1'); setActiveModule('m00') }} className="inline-flex items-center gap-3 mb-5">
-              <img src={dbtIconTransparent} alt="dbt" className="h-14" />
-              <span className="text-white font-bold text-3xl md:text-4xl">dbt <span className="font-normal">fundamentals</span></span>
-            </button>
+            <div className="mb-5">
+              <button onClick={() => { setActiveTab('part1'); setActiveModule('m00') }} className="inline-flex items-center gap-3">
+                <img src={dbtIconTransparent} alt="dbt" className="h-14" />
+                <span className="text-white font-bold text-3xl md:text-4xl">dbt <span className="font-normal">fundamentals</span></span>
+              </button>
+            </div>
 
             {/* Top-level tabs */}
             <div className="inline-flex bg-white/10 backdrop-blur-sm rounded-xl p-1 mb-4">
