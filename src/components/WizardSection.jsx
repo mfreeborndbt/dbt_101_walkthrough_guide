@@ -775,7 +775,7 @@ const METADATA_LOOKUPS = [
   'Semantic definitions',
 ]
 
-const TOKEN_PROMPT = '"What is our monthly churn rate by customer segment, broken down by region?"'
+const TOKEN_PROMPT = '"Can you build a model with monthly churn rate by customer segment, broken down by region"'
 
 function TokenUsage({ mode, runId, onDone }) {
   const prefersReduced = useReducedMotion()
