@@ -190,36 +190,70 @@ export function SourcesTopic() {
           <motion.div key="with" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
             <div className="text-center mb-4">
               <h3 className="text-lg font-bold text-gray-900">Declared sources</h3>
-              <p className="text-sm text-gray-500 mt-1">Sources are defined explicitly, with clear lineage and freshness SLAs you can configure.</p>
+              <p className="text-sm text-gray-500 mt-1">Sources are defined explicitly in YAML, with clear lineage and freshness SLAs you configure.</p>
             </div>
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-              <div className="overflow-x-auto">
-                <MiniDAG
-                  width={560} height={160}
-                  nodes={[
-                    { id: 'raw_orders', label: 'raw_orders', x: 16, y: 20, color: LC.source.fill, highlight: true, w: 100, h: NH },
-                    { id: 'raw_customers', label: 'raw_customers', x: 16, y: 62, color: LC.source.fill, highlight: true, w: 100, h: NH },
-                    { id: 'raw_payments', label: 'raw_payments', x: 16, y: 104, color: LC.source.fill, highlight: true, w: 100, h: NH },
-                    { id: 'stg_orders', label: 'stg_orders', x: 190, y: 20, color: LC.staging.fill, w: 100, h: NH },
-                    { id: 'stg_customers', label: 'stg_customers', x: 190, y: 62, color: LC.staging.fill, w: 100, h: NH },
-                    { id: 'stg_payments', label: 'stg_payments', x: 190, y: 104, color: LC.staging.fill, w: 100, h: NH },
-                    { id: 'fct_orders', label: 'fct_orders', x: 380, y: 62, color: LC.mart.fill, w: 100, h: NH },
-                  ]}
-                  edges={[
-                    ['raw_orders', 'stg_orders'], ['raw_customers', 'stg_customers'], ['raw_payments', 'stg_payments'],
-                    ['stg_orders', 'fct_orders'], ['stg_customers', 'fct_orders'], ['stg_payments', 'fct_orders'],
-                  ]}
-                  badges={[
-                    { x: 118, y: 6, label: 'fresh', bg: LC.source.light, border: LC.source.border, textColor: '#166534' },
-                    { x: 118, y: 48, label: 'fresh', bg: LC.source.light, border: LC.source.border, textColor: '#166534' },
-                    { x: 118, y: 90, label: 'stale', bg: '#fffbeb', border: '#fde68a', textColor: '#92400e' },
-                  ]}
-                />
-              </div>
-              <div className="flex items-center justify-center gap-4 mt-2 text-[10px]">
-                <div className="flex items-center gap-1"><span className={`w-2 h-2 rounded-full ${LC.source.dot}`} /> source</div>
-                <div className="flex items-center gap-1"><span className={`w-2 h-2 rounded-full ${LC.staging.dot}`} /> staging</div>
-                <div className="flex items-center gap-1"><span className={`w-2 h-2 rounded-full ${LC.mart.dot}`} /> mart</div>
+              <div className="grid grid-cols-1 lg:grid-cols-[45fr_55fr] gap-4 items-center">
+                {/* LEFT: sources.yml card */}
+                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border-b border-gray-200">
+                    <span className="text-[10px] font-mono font-bold text-gray-600">sources.yml</span>
+                  </div>
+                  <pre className="px-3 py-2.5 text-[10px] leading-[16px] font-mono overflow-x-auto whitespace-pre">{
+`sources:
+  - name: raw
+    database: raw
+    schema: public
+    tables:
+      - name: raw_orders
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+
+      - name: raw_customers
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+
+      - name: raw_payments
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 12, period: hour}`
+                  }</pre>
+                </div>
+
+                {/* RIGHT: lineage diagram + legend */}
+                <div className="flex flex-col justify-center">
+                  <div className="overflow-x-auto">
+                    <MiniDAG
+                      width={560} height={260}
+                      nodes={[
+                        { id: 'raw_orders', label: 'raw_orders', x: 10, y: 20, color: LC.source.fill, highlight: true, w: 120, h: 36 },
+                        { id: 'raw_customers', label: 'raw_customers', x: 10, y: 90, color: LC.source.fill, highlight: true, w: 120, h: 36 },
+                        { id: 'raw_payments', label: 'raw_payments', x: 10, y: 160, color: LC.source.fill, highlight: true, w: 120, h: 36 },
+                        { id: 'stg_orders', label: 'stg_orders', x: 210, y: 20, color: LC.staging.fill, w: 120, h: 36 },
+                        { id: 'stg_customers', label: 'stg_customers', x: 210, y: 90, color: LC.staging.fill, w: 120, h: 36 },
+                        { id: 'stg_payments', label: 'stg_payments', x: 210, y: 160, color: LC.staging.fill, w: 120, h: 36 },
+                        { id: 'fct_orders', label: 'fct_orders', x: 420, y: 90, color: LC.mart.fill, w: 120, h: 36 },
+                      ]}
+                      edges={[
+                        ['raw_orders', 'stg_orders'], ['raw_customers', 'stg_customers'], ['raw_payments', 'stg_payments'],
+                        ['stg_orders', 'fct_orders'], ['stg_customers', 'fct_orders'], ['stg_payments', 'fct_orders'],
+                      ]}
+                      badges={[
+                        { x: 132, y: 8, label: 'fresh', bg: LC.source.light, border: LC.source.border, textColor: '#166534' },
+                        { x: 132, y: 78, label: 'fresh', bg: LC.source.light, border: LC.source.border, textColor: '#166534' },
+                        { x: 132, y: 148, label: 'stale', bg: '#fffbeb', border: '#fde68a', textColor: '#92400e' },
+                      ]}
+                    />
+                  </div>
+                  <p className="text-[10px] text-gray-400 text-center mt-1 italic">freshness config in YAML → drives these badges</p>
+                  <div className="flex items-center justify-center gap-4 mt-2 text-[10px]">
+                    <div className="flex items-center gap-1"><span className={`w-2 h-2 rounded-full ${LC.source.dot}`} /> source</div>
+                    <div className="flex items-center gap-1"><span className={`w-2 h-2 rounded-full ${LC.staging.dot}`} /> staging</div>
+                    <div className="flex items-center gap-1"><span className={`w-2 h-2 rounded-full ${LC.mart.dot}`} /> mart</div>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
