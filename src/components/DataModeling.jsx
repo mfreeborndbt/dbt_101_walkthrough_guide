@@ -166,19 +166,27 @@ export function SourcesTopic() {
         {!withDbt ? (
           <motion.div key="without" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.3 }}>
             <div className="text-center mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Raw tables, no signposts</h3>
-              <p className="text-sm text-gray-500 mt-1">Nothing marks what is a source versus a transformed table, or what is safe to read versus write.</p>
+              <h3 className="text-lg font-bold text-gray-900">Tables with no context</h3>
+              <p className="text-sm text-gray-500 mt-1">Nothing marks what is a <span className="font-semibold text-gray-700">source</span> versus a <span className="font-semibold text-gray-700">transformed</span> table, what is safe to <span className="font-semibold text-gray-700">read</span> versus <span className="font-semibold text-gray-700">write</span>, or whether data is <span className="font-semibold text-gray-700">fresh</span> versus <span className="font-semibold text-gray-700">stale</span>.</p>
             </div>
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
                 {[
                   { name: 'raw_orders', accent: '#94a3b8' }, { name: 'customers', accent: '#a78bfa' },
                   { name: 'stg_payments', accent: '#6366f1' }, { name: 'dim_products', accent: '#f59e0b' },
-                  { name: 'orders_v2', accent: '#94a3b8' }, { name: 'raw_events', accent: '#94a3b8' },
+                  { name: 'orders_v2', accent: '#94a3b8' }, { name: 'raw_events', accent: '#fb923c' },
                   { name: 'user_sessions', accent: '#a78bfa' }, { name: 'fct_revenue', accent: '#f59e0b' },
                   { name: 'tmp_refunds', accent: '#fb923c' }, { name: 'customer_final', accent: '#a78bfa' },
+                  { name: 'orders_backup', accent: '#94a3b8' }, { name: 'payments', accent: '#6366f1' },
+                  { name: 'stg_users', accent: '#f59e0b' }, { name: 'int_sessions', accent: '#a78bfa' },
+                  { name: 'products', accent: '#94a3b8' }, { name: 'revenue_temp', accent: '#fb923c' },
+                  { name: 'dim_dates', accent: '#6366f1' }, { name: 'raw_clicks', accent: '#f59e0b' },
+                  { name: 'fct_orders_old', accent: '#a78bfa' }, { name: 'sessions_v3', accent: '#94a3b8' },
+                  { name: 'checkout', accent: '#fb923c' }, { name: 'tmp_2', accent: '#6366f1' },
+                  { name: 'order_items', accent: '#a78bfa' }, { name: 'agg_daily', accent: '#f59e0b' },
+                  { name: 'final_customers', accent: '#94a3b8' },
                 ].map((t) => (
-                  <HoverBox key={t.name} className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-center hover:shadow-md hover:border-gray-300 transition-shadow border-l-[3px]" style={{ borderLeftColor: t.accent }}>
+                  <HoverBox key={t.name} className="bg-white border border-gray-200 rounded-lg px-2 py-2 text-center hover:shadow-md hover:border-gray-300 transition-shadow border-l-[3px]" style={{ borderLeftColor: t.accent }}>
                     <div className="font-mono text-[10px] text-gray-600 truncate">{t.name}</div>
                     <div className="text-[9px] text-gray-400 mt-0.5">table</div>
                   </HoverBox>
