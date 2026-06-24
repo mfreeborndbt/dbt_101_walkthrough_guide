@@ -209,8 +209,8 @@ export function SourcesTopic() {
                   </div>
                   <pre className="px-3 py-2.5 text-[10px] leading-[16px] font-mono overflow-x-auto whitespace-pre">{
 `sources:
-  - name: raw
-    database: raw
+  - name: crm
+    database: crm
     schema: public
     tables:
       - name: raw_orders
