@@ -1595,9 +1595,18 @@ function ModularityVisual({ showDbt }) {
                 ].map((src, i) => (
                   <g key={`src1-${i}`} className="mod-node-hover">
                     <rect x={0} y={src.y} width={130} height={26} rx={6}
-                      fill="#ecfeff" stroke="#a5f3fc" strokeWidth={1.2} />
-                    <text x={6} y={src.y + 14} fontSize="6" fontWeight="700" fill="#06b6d4" fontFamily="monospace" dominantBaseline="middle">SRC</text>
-                    <text x={27} y={src.y + 14} fontSize={8} fontWeight="600" fill="#155e75" fontFamily="monospace" dominantBaseline="middle">{src.label}</text>
+                      fill={showSecond ? '#fef2f2' : '#ecfeff'}
+                      stroke={showSecond ? '#f87171' : '#a5f3fc'}
+                      strokeWidth={showSecond ? 2 : 1.2}
+                      style={{ transition: 'fill 0.5s ease, stroke 0.5s ease, stroke-width 0.5s ease' }} />
+                    <text x={6} y={src.y + 14} fontSize="6" fontWeight="700"
+                      fill={showSecond ? '#ef4444' : '#06b6d4'}
+                      fontFamily="monospace" dominantBaseline="middle"
+                      style={{ transition: 'fill 0.5s ease' }}>SRC</text>
+                    <text x={27} y={src.y + 14} fontSize={8} fontWeight="600"
+                      fill={showSecond ? '#991b1b' : '#155e75'}
+                      fontFamily="monospace" dominantBaseline="middle"
+                      style={{ transition: 'fill 0.5s ease' }}>{src.label}</text>
                   </g>
                 ))}
 
@@ -1668,16 +1677,22 @@ function ModularityVisual({ showDbt }) {
                   >
                     {/* 4 source nodes (re-reads same 3 + new supplier) */}
                     {[
-                      { label: 'tpch.lineitem', y: 170 },
-                      { label: 'tpch.orders', y: 206 },
-                      { label: 'tpch.part', y: 242 },
-                      { label: 'tpch.supplier', y: 278 },
+                      { label: 'tpch.lineitem', y: 170, duplicate: true },
+                      { label: 'tpch.orders', y: 206, duplicate: true },
+                      { label: 'tpch.part', y: 242, duplicate: true },
+                      { label: 'tpch.supplier', y: 278, duplicate: false },
                     ].map((src, i) => (
                       <g key={`src2-${i}`} className="mod-node-hover">
                         <rect x={0} y={src.y} width={130} height={26} rx={6}
-                          fill="#ecfeff" stroke="#a5f3fc" strokeWidth={1.2} />
-                        <text x={6} y={src.y + 14} fontSize="6" fontWeight="700" fill="#06b6d4" fontFamily="monospace" dominantBaseline="middle">SRC</text>
-                        <text x={27} y={src.y + 14} fontSize={8} fontWeight="600" fill="#155e75" fontFamily="monospace" dominantBaseline="middle">{src.label}</text>
+                          fill={src.duplicate ? '#fef2f2' : '#ecfeff'}
+                          stroke={src.duplicate ? '#f87171' : '#a5f3fc'}
+                          strokeWidth={src.duplicate ? 2 : 1.2} />
+                        <text x={6} y={src.y + 14} fontSize="6" fontWeight="700"
+                          fill={src.duplicate ? '#ef4444' : '#06b6d4'}
+                          fontFamily="monospace" dominantBaseline="middle">SRC</text>
+                        <text x={27} y={src.y + 14} fontSize={8} fontWeight="600"
+                          fill={src.duplicate ? '#991b1b' : '#155e75'}
+                          fontFamily="monospace" dominantBaseline="middle">{src.label}</text>
                       </g>
                     ))}
 
