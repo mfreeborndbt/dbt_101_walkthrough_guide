@@ -299,7 +299,7 @@ export default function Module00Overview() {
                                 <p className="text-base font-bold text-gray-900">Transformation</p>
                                 <div className="flex items-center justify-center gap-1.5 mt-1">
                                   <img src={dbtIcon} alt="" className="h-4" />
-                                  <p className="text-sm text-[#F97316] font-bold">dbt Fusion engine</p>
+                                  <p className="text-sm text-[#F97316] font-bold">dbt v2 engine</p>
                                 </div>
                               </div>
                             </motion.div>
