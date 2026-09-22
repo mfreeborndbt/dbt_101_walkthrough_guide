@@ -14,7 +14,7 @@ const subtabs = [
 
 const subtabDescs = {
   state: 'dbt can detect which sources have new data and only rebuild what is necessary.',
-  compile: 'The dbt Fusion engine catches column and syntax errors locally, before any query reaches the warehouse.',
+  compile: 'The dbt v2 engine catches column and syntax errors locally, before any query reaches the warehouse.',
   statemod: 'When you change a model\u2019s code, state:modified rebuilds and re-tests only what changed and what depends on it \u2014 not your whole project.',
   deferral: 'Reference production artifacts for unmodified models so dev builds only touch what changed.',
 }

@@ -78,7 +78,7 @@ export default function LiveCompileDemo() {
             onClick={runValidation}
             className="px-5 py-2 rounded-lg font-medium text-sm bg-gray-900 text-white hover:bg-gray-800 transition-all duration-150"
           >
-            Check with Fusion
+            Check with v2 engine
           </button>
         )}
       </div>
@@ -93,7 +93,7 @@ export default function LiveCompileDemo() {
           {/* Editor tab bar */}
           <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400">{isWith ? 'dbt Studio (Fusion)' : 'SQL editor'}</span>
+              <span className="text-xs text-gray-400">{isWith ? 'dbt Studio (v2 engine)' : 'SQL editor'}</span>
               <span className="text-xs font-mono font-semibold text-gray-700 bg-white px-2 py-0.5 rounded border border-gray-200">fct_customer_orders.sql</span>
             </div>
             {isWith && phase === 'caught' && (
@@ -146,7 +146,7 @@ export default function LiveCompileDemo() {
                     <code className="bg-red-100 px-1 rounded">customr_id</code> does not exist on <code className="bg-red-100 px-1 rounded">stg_customers</code>.
                     Did you mean <code className="bg-green-100 text-green-700 px-1 rounded">customer_id</code>?
                   </p>
-                  <p className="text-red-500 ml-5 mt-1 text-[10px]">Caught by the dbt Fusion engine (local, no warehouse execution)</p>
+                  <p className="text-red-500 ml-5 mt-1 text-[10px]">Caught by the dbt v2 engine (local, no warehouse execution)</p>
                 </div>
               </motion.div>
             )}
@@ -162,14 +162,14 @@ export default function LiveCompileDemo() {
             className="bg-white border border-gray-200/60 rounded-2xl p-5 shadow-sm"
           >
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              {isWith ? 'Fusion engine (local)' : 'Warehouse execution'}
+              {isWith ? 'v2 engine (local)' : 'Warehouse execution'}
             </p>
 
             <AnimatePresence mode="wait">
               {phase === 'idle' && (
                 <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <p className="text-sm text-gray-400">
-                    {isWith ? 'Click "Check with Fusion" to validate locally.' : 'Click "Submit to warehouse" to execute.'}
+                    {isWith ? 'Click "Check with v2 engine" to validate locally.' : 'Click "Submit to warehouse" to execute.'}
                   </p>
                 </motion.div>
               )}
@@ -206,7 +206,7 @@ export default function LiveCompileDemo() {
                 <motion.div key="caught" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                     <p className="text-xs font-semibold text-green-800 mb-1">Error caught locally</p>
-                    <p className="text-xs text-green-700">The dbt Fusion engine identified the invalid column before any query reached the warehouse.</p>
+                    <p className="text-xs text-green-700">The dbt v2 engine identified the invalid column before any query reached the warehouse.</p>
                   </div>
                 </motion.div>
               )}
@@ -241,7 +241,7 @@ export default function LiveCompileDemo() {
               </div>
               {/* With */}
               <div className={`rounded-xl p-3 border ${isWith ? 'border-green-200 bg-green-50/50' : 'border-gray-200 bg-gray-50'}`}>
-                <p className="text-[10px] font-semibold text-gray-500 mb-2">With Fusion</p>
+                <p className="text-[10px] font-semibold text-gray-500 mb-2">With v2 engine</p>
                 <div className="space-y-1.5 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Feedback time</span>
