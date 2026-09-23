@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import DependencyManagement from './DependencyManagement'
 
@@ -57,6 +57,12 @@ const advantages = [
     title: 'Version Controlled',
     icon: '📦',
     custom: 'versioned',
+  },
+  {
+    id: 'checks',
+    title: 'Checks',
+    icon: '🛡️',
+    custom: 'checks',
   },
 ]
 
@@ -2925,6 +2931,508 @@ function TestingVisual({ showDbt }) {
   )
 }
 
+/* ------------------------------------------------------------------ */
+/*  Checks Visual                                                      */
+/* ------------------------------------------------------------------ */
+
+const checksCategories = [
+  {
+    name: 'Modeling',
+    checks: [
+      { name: 'Direct join to source', severity: 'error' },
+      { name: 'Duplicate sources', severity: 'error' },
+      { name: 'Multiple sources joined', severity: 'warn' },
+      { name: 'Staging models dependent on downstream', severity: 'error' },
+      { name: 'Unused sources', severity: 'warn' },
+    ],
+  },
+  {
+    name: 'Testing',
+    checks: [
+      { name: 'Missing primary key tests', severity: 'error' },
+      { name: 'Test coverage below threshold', severity: 'error' },
+      { name: 'Missing source freshness', severity: 'warn' },
+    ],
+  },
+  {
+    name: 'Documentation',
+    checks: [
+      { name: 'Undocumented public models', severity: 'error' },
+      { name: 'Documentation coverage', severity: 'warn' },
+      { name: 'Undocumented sources', severity: 'warn' },
+    ],
+  },
+  {
+    name: 'Governance',
+    checks: [
+      { name: 'Public models without contracts', severity: 'error' },
+      { name: 'Model naming conventions', severity: 'error' },
+      { name: 'Exposures dependent on private models', severity: 'warn' },
+    ],
+  },
+]
+
+const checksTotalCount = checksCategories.reduce((sum, c) => sum + c.checks.length, 0)
+
+const checksMessyResults = {
+  'Direct join to source': 'error',
+  'Unused sources': 'warn',
+  'Missing primary key tests': 'error',
+  'Documentation coverage': 'warn',
+}
+
+function ChecksVisual({ showDbt }) {
+  const [isRunning, setIsRunning] = useState(false)
+  const [hasRun, setHasRun] = useState(false)
+  const [messy, setMessy] = useState(false)
+  const [checkStates, setCheckStates] = useState({})
+  const [passedCount, setPassedCount] = useState(0)
+  const [errorCount, setErrorCount] = useState(0)
+  const [warnCount, setWarnCount] = useState(0)
+  const [phase, setPhase] = useState('idle') // idle | running | gate | done
+  const [terminalLines, setTerminalLines] = useState([])
+  const [expandedCat, setExpandedCat] = useState(null)
+  const timeoutsRef = useRef([])
+
+  const reset = useCallback(() => {
+    timeoutsRef.current.forEach(clearTimeout)
+    timeoutsRef.current = []
+    setCheckStates({})
+    setPassedCount(0)
+    setErrorCount(0)
+    setWarnCount(0)
+    setPhase('idle')
+    setTerminalLines([])
+    setIsRunning(false)
+    setHasRun(false)
+    setExpandedCat(null)
+  }, [])
+
+  const runChecks = useCallback(() => {
+    timeoutsRef.current.forEach(clearTimeout)
+    timeoutsRef.current = []
+    setIsRunning(true)
+    setHasRun(true)
+    setPassedCount(0)
+    setErrorCount(0)
+    setWarnCount(0)
+    setPhase('running')
+    setExpandedCat(null)
+
+    const init = {}
+    checksCategories.forEach(cat => {
+      const checks = {}
+      cat.checks.forEach(c => { checks[c.name] = 'pending' })
+      init[cat.name] = { status: 'pending', checks }
+    })
+    setCheckStates(init)
+
+    setTerminalLines([
+      { text: '$ dbt check', type: 'command' },
+      { text: 'Running project checks against dbt Information Schema...', type: 'info' },
+      { text: '', type: 'blank' },
+    ])
+
+    let delay = 500
+    let runningPassed = 0
+    let runningErrors = 0
+    let runningWarns = 0
+
+    checksCategories.forEach((cat) => {
+      const t1 = setTimeout(() => {
+        setCheckStates(prev => ({
+          ...prev,
+          [cat.name]: { ...prev[cat.name], status: 'running' },
+        }))
+        setExpandedCat(cat.name)
+        setTerminalLines(prev => [...prev, { text: `  [${cat.name}] Running ${cat.checks.length} checks...`, type: 'run' }])
+      }, delay)
+      timeoutsRef.current.push(t1)
+      delay += 350
+
+      cat.checks.forEach((check) => {
+        const checkDelay = delay
+        const t2 = setTimeout(() => {
+          setCheckStates(prev => {
+            const updated = { ...prev }
+            updated[cat.name] = {
+              ...updated[cat.name],
+              checks: { ...updated[cat.name].checks, [check.name]: 'running' },
+            }
+            return updated
+          })
+        }, checkDelay)
+        timeoutsRef.current.push(t2)
+
+        const messyResult = messy ? checksMessyResults[check.name] : null
+        const completeDelay = checkDelay + 160
+        const t3 = setTimeout(() => {
+          const result = messyResult || 'pass'
+          setCheckStates(prev => {
+            const updated = { ...prev }
+            updated[cat.name] = {
+              ...updated[cat.name],
+              checks: { ...updated[cat.name].checks, [check.name]: result },
+            }
+            return updated
+          })
+          if (result === 'error') {
+            runningErrors++
+            setErrorCount(runningErrors)
+          } else if (result === 'warn') {
+            runningWarns++
+            setWarnCount(runningWarns)
+          } else {
+            runningPassed++
+            setPassedCount(runningPassed)
+          }
+        }, completeDelay)
+        timeoutsRef.current.push(t3)
+        delay = completeDelay + 60
+      })
+
+      const catEndDelay = delay + 80
+      const t4 = setTimeout(() => {
+        setCheckStates(prev => ({
+          ...prev,
+          [cat.name]: { ...prev[cat.name], status: 'done' },
+        }))
+        const catErrors = cat.checks.filter(c => messy && checksMessyResults[c.name] === 'error').length
+        const catWarns = cat.checks.filter(c => messy && checksMessyResults[c.name] === 'warn').length
+        if (catErrors > 0 || catWarns > 0) {
+          const parts = []
+          if (cat.checks.length - catErrors - catWarns > 0) parts.push(`${cat.checks.length - catErrors - catWarns} passed`)
+          if (catErrors > 0) parts.push(`${catErrors} error(s)`)
+          if (catWarns > 0) parts.push(`${catWarns} warning(s)`)
+          setTerminalLines(prev => [...prev, { text: `  [${cat.name}] ${parts.join(', ')}`, type: catErrors > 0 ? 'error' : 'warn' }])
+        } else {
+          setTerminalLines(prev => [...prev, { text: `  [${cat.name}] ${cat.checks.length}/${cat.checks.length} passed`, type: 'ok' }])
+        }
+      }, catEndDelay)
+      timeoutsRef.current.push(t4)
+      delay = catEndDelay + 150
+    })
+
+    const gateDelay = delay + 250
+    const t5 = setTimeout(() => {
+      setPhase('gate')
+      setExpandedCat(null)
+      const totalErrors = messy ? checksCategories.reduce((sum, cat) => sum + cat.checks.filter(c => checksMessyResults[c.name] === 'error').length, 0) : 0
+      if (totalErrors > 0) {
+        setTerminalLines(prev => [...prev,
+          { text: '', type: 'blank' },
+          { text: `Checks: ${totalErrors} error(s) found. Build blocked.`, type: 'error' },
+          { text: 'Fix failing checks before proceeding.', type: 'error' },
+        ])
+      } else {
+        setTerminalLines(prev => [...prev,
+          { text: '', type: 'blank' },
+          { text: `Checks: ${checksTotalCount}/${checksTotalCount} passed`, type: 'success' },
+          { text: 'All checks passed. Proceeding to compilation...', type: 'success' },
+        ])
+      }
+    }, gateDelay)
+    timeoutsRef.current.push(t5)
+
+    const doneDelay = gateDelay + 1000
+    const t6 = setTimeout(() => {
+      setPhase('done')
+      setIsRunning(false)
+    }, doneDelay)
+    timeoutsRef.current.push(t6)
+  }, [messy])
+
+  const getCheckIcon = (state) => {
+    if (state === 'pass') return <span className="text-green-600 font-bold text-xs">&#10003;</span>
+    if (state === 'error') return <span className="text-red-500 font-bold text-xs">&#10007;</span>
+    if (state === 'warn') return <span className="text-amber-500 font-bold text-xs">&#9888;</span>
+    if (state === 'running') return <span className="w-2 h-2 rounded-full bg-blue-500 inline-block animate-pulse" />
+    return <span className="w-2 h-2 rounded-full bg-gray-300 inline-block" />
+  }
+
+  const getCatIcon = (catName) => {
+    const cat = checkStates[catName]
+    if (!cat) return <span className="w-3 h-3 rounded-full bg-gray-200 inline-block" />
+    if (cat.status === 'done') {
+      const hasError = Object.values(cat.checks).some(s => s === 'error')
+      const hasWarn = Object.values(cat.checks).some(s => s === 'warn')
+      if (hasError) return <span className="text-red-500 font-bold">&#10007;</span>
+      if (hasWarn) return <span className="text-amber-500 font-bold">&#9888;</span>
+      return <span className="text-green-600 font-bold">&#10003;</span>
+    }
+    if (cat.status === 'running') return <span className="w-3 h-3 rounded-full bg-blue-500 inline-block animate-pulse" />
+    return <span className="w-3 h-3 rounded-full bg-gray-200 inline-block" />
+  }
+
+  if (!showDbt) {
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Left: inconsistent project examples */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Your dbt project</p>
+            <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }} className="bg-white border border-gray-200 rounded-lg p-3 cursor-default hover:shadow-md transition-shadow">
+              <div className="font-mono text-[11px] leading-relaxed text-gray-700">
+                <div className="text-gray-400 mb-1">-- models/mart_revenue.sql</div>
+                <div><span className="text-blue-600">SELECT</span></div>
+                <div className="ml-2">c.customer_id,</div>
+                <div className="ml-2">c.name,</div>
+                <div className="ml-2"><span className="text-blue-600">SUM</span>(o.amount) <span className="text-blue-600">AS</span> total_revenue</div>
+                <div><span className="text-blue-600">FROM</span> <span className="text-red-600 bg-red-50 px-0.5 rounded">raw.public.orders</span> o</div>
+                <div><span className="text-blue-600">JOIN</span> <span className="text-red-600 bg-red-50 px-0.5 rounded">raw.public.customers</span> c</div>
+                <div className="ml-2"><span className="text-blue-600">ON</span> o.customer_id = c.id</div>
+                <div><span className="text-blue-600">GROUP BY</span> 1, 2</div>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <span className="text-[9px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-medium">Direct source join</span>
+                <span className="text-[9px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-medium">Multiple sources joined</span>
+                <span className="text-[9px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-medium">No staging layer</span>
+              </div>
+            </motion.div>
+            <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }} className="bg-white border border-gray-200 rounded-lg p-3 cursor-default hover:shadow-md transition-shadow">
+              <div className="font-mono text-[11px] leading-relaxed text-gray-700">
+                <div className="text-gray-400 mb-1">-- models/STG_Customers.sql</div>
+                <div><span className="text-blue-600">SELECT</span></div>
+                <div className="ml-2">id <span className="text-blue-600">AS</span> customer_id,</div>
+                <div className="ml-2">name,</div>
+                <div className="ml-2">email</div>
+                <div><span className="text-blue-600">FROM</span> {"{{ source('raw', 'customers') }}"}</div>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <span className="text-[9px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-medium">Wrong naming convention</span>
+                <span className="text-[9px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-medium">No tests defined</span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right: the consequences */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">What goes wrong</p>
+            {[
+              { icon: '🎲', title: 'Inconsistent standards', desc: 'Every developer follows their own conventions. Naming, structure, and patterns vary across the project.' },
+              { icon: '🕳️', title: 'Missing test coverage', desc: 'Models ship to production without primary key tests, freshness checks, or data validation.' },
+              { icon: '📭', title: 'Undocumented models', desc: 'Public models have no descriptions and no contracts. Consumers have to guess at the schema.' },
+              { icon: '🔍', title: 'Manual code review', desc: 'Catching these issues falls entirely on reviewers. Standards drift as the team grows.' },
+            ].map((item, i) => (
+              <motion.div key={i} whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }} className="bg-white border border-red-100 rounded-lg p-3 cursor-default hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-lg shrink-0">{item.icon}</span>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800">{item.title}</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // With dbt
+  return (
+    <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Left: check definitions */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Check definitions</p>
+          <div className="bg-white border border-gray-200 rounded-lg p-3">
+            <p className="text-[10px] font-semibold text-gray-700 mb-1.5 font-mono">checks/direct_join_to_source.sql</p>
+            <div className="font-mono text-[10px] leading-relaxed">
+              <div className="text-gray-400">-- Fails if any model reads directly from a source</div>
+              <div className="text-gray-700"><span className="text-blue-600">SELECT</span> unique_id</div>
+              <div className="text-gray-700"><span className="text-blue-600">FROM</span> <span className="text-emerald-600">{"{{ info_schema('edges') }}"}</span></div>
+              <div className="text-gray-700"><span className="text-blue-600">WHERE</span> parent_unique_id <span className="text-blue-600">LIKE</span> <span className="text-amber-600">'source.%'</span></div>
+              <div className="text-gray-700">  <span className="text-blue-600">AND</span> child_unique_id <span className="text-blue-600">NOT LIKE</span> <span className="text-amber-600">'%stg_%'</span></div>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-3">
+            <p className="text-[10px] font-semibold text-gray-700 mb-1.5 font-mono">checks/_checks.yml</p>
+            <div className="font-mono text-[10px] leading-relaxed">
+              <div><span className="text-purple-600">version</span>: <span className="text-emerald-600">2</span></div>
+              <div><span className="text-purple-600">checks</span>:</div>
+              <div>  - <span className="text-purple-600">name</span>: <span className="text-emerald-600">direct_join_to_source</span></div>
+              <div>    <span className="text-purple-600">config</span>:</div>
+              <div>      <span className="text-purple-600">severity</span>: <span className="text-red-600">error</span></div>
+              <div className="mt-0.5">  - <span className="text-purple-600">name</span>: <span className="text-emerald-600">undocumented_public_models</span></div>
+              <div>    <span className="text-purple-600">config</span>:</div>
+              <div>      <span className="text-purple-600">severity</span>: <span className="text-amber-600">warn</span></div>
+              <div className="mt-0.5">  - <span className="text-purple-600">name</span>: <span className="text-emerald-600">missing_primary_key_tests</span></div>
+              <div>    <span className="text-purple-600">config</span>:</div>
+              <div>      <span className="text-purple-600">severity</span>: <span className="text-red-600">error</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: interactive check simulator */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Run checks</p>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={messy}
+                  onChange={(e) => { reset(); setMessy(e.target.checked) }}
+                  className="rounded border-gray-300"
+                />
+                Messy project
+              </label>
+              <button
+                onClick={hasRun ? () => { reset(); setTimeout(runChecks, 50) } : runChecks}
+                disabled={isRunning}
+                className={`text-xs font-semibold px-4 py-1.5 rounded-lg transition-all duration-150 ${
+                  isRunning
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-900 text-white hover:bg-gray-800 active:bg-gray-950'
+                }`}
+              >
+                {isRunning ? 'Running...' : hasRun ? 'Run again' : 'Run dbt check'}
+              </button>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <div>
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+              <span>Checks: {passedCount + errorCount + warnCount} / {checksTotalCount}</span>
+              <span>
+                {passedCount > 0 && <span className="text-green-600">{passedCount} passed</span>}
+                {warnCount > 0 && <span className="text-amber-500 ml-2">{warnCount} warnings</span>}
+                {errorCount > 0 && <span className="text-red-500 ml-2">{errorCount} errors</span>}
+              </span>
+            </div>
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full ${errorCount > 0 ? 'bg-red-500' : warnCount > 0 ? 'bg-amber-400' : 'bg-green-500'}`}
+                initial={{ width: '0%' }}
+                animate={{ width: `${((passedCount + errorCount + warnCount) / checksTotalCount) * 100}%` }}
+                transition={{ duration: 0.2 }}
+              />
+            </div>
+          </div>
+
+          {/* Category cards */}
+          <div className="grid grid-cols-2 gap-2">
+            {checksCategories.map(cat => {
+              const state = checkStates[cat.name]
+              const isExpanded = expandedCat === cat.name
+              const doneChecks = state ? Object.values(state.checks).filter(s => s === 'pass' || s === 'error' || s === 'warn').length : 0
+
+              return (
+                <motion.div
+                  key={cat.name}
+                  whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  onClick={() => setExpandedCat(isExpanded ? null : cat.name)}
+                  className={`border rounded-xl p-2.5 cursor-pointer transition-all duration-200 ${
+                    state?.status === 'running' ? 'border-blue-300 bg-blue-50/50' :
+                    state?.status === 'done' && Object.values(state.checks).some(s => s === 'error') ? 'border-red-300 bg-red-50/50' :
+                    state?.status === 'done' && Object.values(state.checks).some(s => s === 'warn') ? 'border-amber-300 bg-amber-50/50' :
+                    state?.status === 'done' ? 'border-green-300 bg-green-50/50' :
+                    'border-gray-200 bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-0.5">
+                    <div className="flex items-center gap-1.5">
+                      {getCatIcon(cat.name)}
+                      <span className="text-xs font-semibold text-gray-800">{cat.name}</span>
+                    </div>
+                    <span className="text-[10px] text-gray-400">{doneChecks}/{cat.checks.length}</span>
+                  </div>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-1.5 space-y-0.5">
+                          {cat.checks.map(check => {
+                            const checkResult = state?.checks?.[check.name] || 'pending'
+                            const failed = checkResult === 'error' || checkResult === 'warn'
+                            return (
+                              <div key={check.name} className="flex items-center gap-1.5 text-[10px] text-gray-600 py-0.5">
+                                {getCheckIcon(checkResult)}
+                                <span className={
+                                  checkResult === 'error' ? 'text-red-600 font-medium' :
+                                  checkResult === 'warn' ? 'text-amber-600 font-medium' : ''
+                                }>{check.name}</span>
+                                {failed && <span className={`ml-auto text-[9px] font-medium ${check.severity === 'error' ? 'text-red-400' : 'text-amber-400'}`}>{check.severity}</span>}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  {!isExpanded && doneChecks > 0 && doneChecks < cat.checks.length && (
+                    <div className="h-1 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
+                      <div className="h-full bg-blue-400 rounded-full transition-all" style={{ width: `${(doneChecks / cat.checks.length) * 100}%` }} />
+                    </div>
+                  )}
+                </motion.div>
+              )
+            })}
+          </div>
+
+          {/* Gate status */}
+          <AnimatePresence>
+            {(phase === 'gate' || phase === 'done') && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`px-3 py-2 rounded-xl border text-xs font-medium ${
+                  errorCount > 0
+                    ? 'bg-red-50 border-red-200 text-red-800'
+                    : 'bg-green-50 border-green-200 text-green-800'
+                }`}
+              >
+                {errorCount > 0
+                  ? `${errorCount} check(s) failed. Build blocked until errors are resolved.`
+                  : 'All checks passed. Build proceeds.'
+                }
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Console */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono text-[10px] h-36 overflow-y-auto">
+            <AnimatePresence>
+              {terminalLines.map((line, i) => (
+                <motion.div
+                  key={`line-${i}`}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className={
+                    line.type === 'command' ? 'text-emerald-700 font-bold' :
+                    line.type === 'info' ? 'text-gray-400' :
+                    line.type === 'run' ? 'text-blue-600' :
+                    line.type === 'ok' ? 'text-emerald-600' :
+                    line.type === 'success' ? 'text-emerald-700 font-bold' :
+                    line.type === 'error' ? 'text-red-600 font-semibold' :
+                    line.type === 'warn' ? 'text-amber-600 font-semibold' :
+                    ''
+                  }
+                >
+                  {line.text || '\u00A0'}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {terminalLines.length === 0 && (
+              <div className="text-gray-400">Click &quot;Run dbt check&quot; to validate project standards...</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /*  Main component                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -2953,6 +3461,8 @@ export default function DbtModels() {
         return <VersionControlVisual showDbt={showDbt} />
       case 'testing':
         return <TestingVisual showDbt={showDbt} />
+      case 'checks':
+        return <ChecksVisual showDbt={showDbt} />
       default:
         return null
     }
